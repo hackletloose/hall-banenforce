@@ -90,7 +90,7 @@ def check_player(steamid):
     logging.info("Checking id " + steamid)
     steamapi = SteamAPI()
     profile = steamapi.getprofile(steamid)
-    if bool(os.environ["Ban_player_if_communityprofile_not_configured"]) == True and profile["profilestate"] != 1:
+    if bool(os.environ["Ban_player_if_communityprofile_not_configured"]) == True and profile.get("profilestate") != 1:
         logging.info("Banning ID because profile not configured")
         Serverrequest.add_blacklist_record(steamid, os.environ["No_Communityprofile_Banreason"])
     if profile["communityvisibilitystate"] != 3:
