@@ -14,10 +14,9 @@ services:
     image: mariadb:lts
     restart: unless-stopped
     environment:
-      MYSQL_DATABASE: "ban_enforcer"
-      MYSQL_ROOT_PASSWORD: "ChangeMe"
-      MYSQL_USER: "ban_enforcer"
-      MYSQL_PASSWORD: "ChangeMe"
+      MYSQL_DATABASE: ${DB_Database}
+      MYSQL_USER: ${DB_User}
+      MYSQL_PASSWORD: ${DB_Password}
     ports:
       - 3306
     volumes:
