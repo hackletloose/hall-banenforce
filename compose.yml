@@ -1,6 +1,6 @@
 services:
   hall-ban-enforcer:
-    image: ghcr.io/hackletloose/hall-banenforce:main
+    image: ghcr.io/hackletloose/hall-banenforce:latest
     container_name: hall-ban-enforcer
     restart: unless-stopped
     env_file:
@@ -10,10 +10,11 @@ services:
         restart: true
         condition: service_healthy
   db:
-    container_name: db
+    container_name: ban-enforcer-db
     image: mariadb:lts
     restart: unless-stopped
     environment:
+      MARIADB_ROOT_PASSWORD: ${DB_Root_Password}
       MYSQL_DATABASE: ${DB_Database}
       MYSQL_USER: ${DB_User}
       MYSQL_PASSWORD: ${DB_Password}
