@@ -13,6 +13,7 @@ If the account is created recently, does not seem to own hell let loose or the c
 - Checks player after a few days again, if profile is private (customizable in settings)
 - Customizable messages
 - Customizable Banlist
+- Able to whitelist player with a flag in CRCON
 
 ## Requirements
 - CRCON Tool
