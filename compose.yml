@@ -1,0 +1,30 @@
+services:
+  hall-ban-enforcer:
+    image: ghcr.io/hackletloose/hall-banenforce:main
+    container_name: hall-ban-enforcer
+    restart: unless-stopped
+    env_file:
+      - .env
+    depends_on:
+      db:
+        restart: true
+        condition: service_healthy
+  db:
+    container_name: db
+    image: mariadb:lts
+    restart: unless-stopped
+    environment:
+      MYSQL_DATABASE: "ban_enforcer"
+      MYSQL_ROOT_PASSWORD: "ChangeMe"
+      MYSQL_USER: "ban_enforcer"
+      MYSQL_PASSWORD: "ChangeMe"
+    ports:
+      - 3306
+    volumes:
+      - ./data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      start_period: 10s
+      interval: 10s
+      timeout: 5s
+      retries: 3
