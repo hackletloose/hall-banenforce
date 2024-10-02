@@ -12,11 +12,13 @@ import requests
 import asyncio
 from threading import Event
 from steam_web_api import Steam
+import sys
 
 if os.path.exists(".env"):
     load_dotenv()
 
 ALL_ACTIONS_TO_MONITOR = ['CONNECTED']
+logging.basicConfig(stream=sys.stderr, level= int(os.environ["log_level"]))
 
 class CustomDecoder(json.JSONDecoder):
     def __init__(self, *args, **kwargs):
