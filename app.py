@@ -4,6 +4,7 @@ from dotenv import load_dotenv
 import mariadb
 import json
 from datetime import datetime
+from datetime import date
 import websockets
 from websockets.exceptions import ConnectionClosed
 import logging
@@ -38,14 +39,14 @@ def need_profile_check(steamid):
             "SELECT check_complete, last_checked FROM usertable WHERE steamid = ?",
             [steamid])
         result = cur.fetchall()
-        if result == None:
+        if not result:
             # Don't know account, check
             return True
-        if result[0] == True:
+        if result[0][0] == True:
             # Account was already checked and is valid, don't check
             return False
-        today = datetime.now()
-        date_checked = result[1]
+        today = date.today()
+        date_checked = result[0][1]
         difference_in_days = (today - date_checked).days
         if difference_in_days < int(os.environ["check_profiles_every_days"]):
             # If already checked in last X days, don't check
@@ -75,30 +76,37 @@ def check_account_own_hll(games):
     return False
 
 def add_player_to_db(steamid, check_successfull):
+    steamid = int(steamid)
+    check_successfull = bool(check_successfull)
     with DBConnection() as cur:
         cur.execute(
-            "INSERT INTO usertable VALUES(steamid=?, check_complete=?, last_checked = CURDATE()) ON DUPLICATE KEY UPDATE check_complete=?, last_checked=CURDATE()",
+            "INSERT INTO usertable (steamid, check_complete, last_checked) VALUES(?, ?, CURDATE()) ON DUPLICATE KEY UPDATE check_complete=?, last_checked=CURDATE()",
             [steamid, check_successfull, check_successfull])
 
 
 def check_player(steamid):
+    logging.info("Checking id " + steamid)
     steamapi = SteamAPI()
     profile = steamapi.getprofile(steamid)
     if bool(os.environ["Ban_player_if_communityprofile_not_configured"]) == True and profile["profilestate"] != 1:
+        logging.info("Banning ID because profile not configured")
         Serverrequest.add_blacklist_record(steamid, os.environ["No_Communityprofile_Banreason"])
     if profile["communityvisibilitystate"] != 3:
+        logging.info("Profile private")
         add_player_to_db(steamid, False)
         return
     current_date = datetime.now()
     timecreated = datetime.fromtimestamp(profile["timecreated"])
     difference_in_days = (current_date - timecreated).days
     if difference_in_days < int(os.environ["minimal_account_age_days"]):
+        logging.info("Banning ID because account too young")
         Serverrequest.add_blacklist_record(steamid, os.environ["minimal_account_age_banreason"])
         return
     if bool(os.environ["check_if_player_owns_hll"]) == True:
         games = steamapi.getownedgames(steamid)
         if games:
             if check_account_own_hll(games) == False:
+                logging.info("Banning Player don't own HLL")
                 Serverrequest.add_blacklist_record(steamid, os.environ["player_dont_own_hll_banreason"])
                 return
         else:
@@ -108,6 +116,7 @@ def check_player(steamid):
             else:
                 add_player_to_db(steamid, True)
             return
+    logging.info("Player seems ok")
     add_player_to_db(steamid, True)
 
 
@@ -184,7 +193,6 @@ class CRCONWebSocketClient:
                             # Player is whitelisted
                             return
                 check_player(steamid)
-                pass
 
 
 
