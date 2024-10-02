@@ -241,7 +241,7 @@ class Serverrequest:
             "Content-Type": "application/json"
         }
         data_request={
-            "blacklist_id": os.environ["BlacklistID"],
+            "blacklist_id": int(os.environ["BlacklistID"]),
             "player_id": steam_id,
             "reason": reason,
             "admin_name": os.environ["Admin-Name"]
