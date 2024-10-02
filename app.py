@@ -93,12 +93,12 @@ def check_player(steamid):
     if bool(os.environ["Ban_player_if_communityprofile_not_configured"]) == True and profile.get("profilestate") != 1:
         logging.info("Banning ID because profile not configured")
         Serverrequest.add_blacklist_record(steamid, os.environ["No_Communityprofile_Banreason"])
-    if profile["communityvisibilitystate"] != 3:
+    if profile.get("communityvisibilitystate") != 3:
         logging.info("Profile private")
         add_player_to_db(steamid, False)
         return
     current_date = datetime.now()
-    timecreated = datetime.fromtimestamp(profile["timecreated"])
+    timecreated = datetime.fromtimestamp(profile.get("timecreated"))
     difference_in_days = (current_date - timecreated).days
     if difference_in_days < int(os.environ["minimal_account_age_days"]):
         logging.info("Banning ID because account too young")
@@ -189,8 +189,8 @@ class CRCONWebSocketClient:
                     # Already checked, no need to query steam
                     return
                 profile = Serverrequest.get_player_profile(steamid)
-                if profile["flags"]:
-                    for flag in profile["flags"]:
+                if profile.get("flags"):
+                    for flag in profile.get("flags"):
                         if flag["flag"] == os.environ["Whitelist_Flag"]:
                             # Player is whitelisted
                             return
