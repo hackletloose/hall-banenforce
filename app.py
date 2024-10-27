@@ -61,7 +61,7 @@ def need_profile_check(steamid):
 
 class SteamAPI:
     def __init__(self):
-        KEY = os.environ["Steam_WebAPI-Key"]
+        KEY = os.environ["Steam_WebAPI_Key"]
         self.steam = Steam(KEY)
 
     def getprofile(self, steamid):
@@ -246,7 +246,7 @@ class Serverrequest:
             "blacklist_id": int(os.environ["BlacklistID"]),
             "player_id": steam_id,
             "reason": reason,
-            "admin_name": os.environ["Admin-Name"]
+            "admin_name": os.environ["Admin_Name"]
         }
         request_url = f"https://{os.environ["Server_URL"]}/api/add_blacklist_record"
         response = requests.post(request_url, data=json.dumps(data_request), headers=headers)
